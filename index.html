@@ -299,6 +299,23 @@
         </div>
     </div>
 
+    <!-- MODAL: TUKAR / EDIT TARIKH SEMAI -->
+    <div id="modal-edit-date" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
+            <h3 class="font-bold text-white text-base">Tetapkan Tarikh Semai</h3>
+            <p class="text-xs text-slate-400" id="modal-date-batch-label">Batch #1</p>
+            <input type="hidden" id="modal-date-batch-id">
+            <div>
+                <label class="block text-slate-400 text-xs font-medium mb-1">Tarikh Menyemai</label>
+                <input type="date" id="modal-date-input" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white text-sm">
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button type="button" onclick="closeModal('modal-edit-date')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-semibold">Batal</button>
+                <button type="button" onclick="saveBatchDate()" class="flex-1 bg-primary-600 hover:bg-primary-500 text-white py-2.5 rounded-xl text-xs font-semibold">Simpan</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: CATAT JUALAN -->
     <div id="modal-harvest" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
@@ -326,7 +343,6 @@
 
     <!-- MAIN JAVASCRIPT LOGIC -->
     <script>
-        // Data Store Default
         const DEFAULT_SETTINGS = {
             variety: "Cili Kulai (F1/568)",
             capacity: 48,
@@ -392,12 +408,12 @@
                 navigator.geolocation.getCurrentPosition(position => {
                     document.getElementById('set-lat').value = position.coords.latitude.toFixed(4);
                     document.getElementById('set-lon').value = position.coords.longitude.toFixed(4);
-                    alert("Koordinat GPS berjaya dikesan! Sila tekan 'Simpan & Jana Semula Batch Kebun'.");
+                    alert("Koordinat GPS berjaya dikesan!");
                 }, () => {
-                    alert("Gagal mengesan lokasi GPS. Sila masukkan secara manual.");
+                    alert("Gagal mengesan lokasi GPS.");
                 });
             } else {
-                alert("Geolocation tidak disokong oleh pelayar anda.");
+                alert("Geolocation tidak disokong.");
             }
         }
 
@@ -438,7 +454,6 @@
                     });
                 }
             } else {
-                // Adjust if capacity changed
                 while (appData.batches.length < targetBatchesCount) {
                     let nextId = appData.batches.length + 1;
                     appData.batches.push({
@@ -489,7 +504,6 @@
             document.getElementById('stat-total-revenue').innerText = `RM ${totalRev.toFixed(2)}`;
             document.getElementById('stat-total-harvest').innerText = `Hasil: ${totalHarvKg.toFixed(1)} kg`;
 
-            // Tasks render
             const taskContainer = document.getElementById('dashboard-tasks-container');
             let tasksHtml = "";
             let activeBatches = appData.batches.filter(b => b.status === "Sedang Berjalan");
@@ -510,7 +524,7 @@
                 } else {
                     tasksHtml += `<div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50">
                         <div class="font-bold text-primary-400">Kawalan Baja Granul NPK</div>
-                        <div class="text-slate-300 mt-0.5">Tabur 1 sudu teh baja NPK setiap 2 minggu sekali di sekeliling pangkal polibeg (elak kena batang).</div>
+                        <div class="text-slate-300 mt-0.5">Tabur 1 sudu teh baja NPK setiap 2 minggu sekali di sekeliling pangkal polibeg.</div>
                     </div>`;
                 }
             }
@@ -524,7 +538,6 @@
             appData.batches.forEach(b => {
                 let badgeColor = "bg-amber-500/10 text-amber-400 border-amber-500/30";
                 if (b.status === "Sedang Berjalan") badgeColor = "bg-primary-500/10 text-primary-400 border-primary-500/30";
-                if (b.status === "Selesai") badgeColor = "bg-blue-500/10 text-blue-400 border-blue-500/30";
 
                 html += `
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-sm">
@@ -532,15 +545,18 @@
                         <div class="font-bold text-white text-sm">${b.name}</div>
                         <span class="text-[10px] px-2 py-0.5 rounded-full border ${badgeColor}">${b.status}</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs text-slate-300">
+                    <div class="grid grid-cols-2 gap-2 text-xs text-slate-300 items-center">
                         <div>Tarikh Semai: <span class="font-medium text-white">${b.seedDate || 'Belum ditetapkan'}</span></div>
                         <div>Pokok Hidup: <span class="font-medium text-white">${b.survivingCount} / ${b.initialCount}</span></div>
                     </div>
-                    <div class="flex gap-2 pt-1 border-t border-slate-800">
+                    <div class="flex gap-2 pt-1 border-t border-slate-800 items-center">
                         ${b.status === 'Belum Disemai' ? 
-                            `<button onclick="startBatch(${b.id})" class="flex-1 bg-primary-600 hover:bg-primary-500 text-white text-xs py-2 rounded-xl font-semibold transition">Mula Semaian</button>` :
+                            `<button onclick="openEditDateModal(${b.id})" class="flex-1 bg-primary-600 hover:bg-primary-500 text-white text-xs py-2 rounded-xl font-semibold transition">Mula Semaian</button>` :
                             `<button onclick="openUpdatePlantsModal(${b.id})" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs py-2 rounded-xl font-semibold transition border border-slate-700">Kemas Kini Pokok</button>`
                         }
+                        <button onclick="openEditDateModal(${b.id})" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-xl text-xs transition border border-slate-700" title="Ubah Tarikh Semai">
+                            <i class="fa-solid fa-calendar-days text-primary-400"></i>
+                        </button>
                         <button onclick="deleteBatch(${b.id})" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 px-3 py-2 rounded-xl text-xs transition border border-rose-500/20">
                             <i class="fa-solid fa-trash"></i>
                         </button>
@@ -550,14 +566,28 @@
             container.innerHTML = html;
         }
 
-        function startBatch(id) {
-            const today = new Date().toISOString().split('T')[0];
+        function openEditDateModal(id) {
             const batch = appData.batches.find(b => b.id === id);
             if (batch) {
-                batch.seedDate = today;
+                document.getElementById('modal-date-batch-id').value = batch.id;
+                document.getElementById('modal-date-batch-label').innerText = `${batch.name}`;
+                document.getElementById('modal-date-input').value = batch.seedDate || new Date().toISOString().split('T')[0];
+                document.getElementById('modal-edit-date').classList.remove('hidden');
+            }
+        }
+
+        function saveBatchDate() {
+            const id = parseInt(document.getElementById('modal-date-batch-id').value);
+            const newDate = document.getElementById('modal-date-input').value;
+            const batch = appData.batches.find(b => b.id === id);
+            if (batch && newDate) {
+                batch.seedDate = newDate;
                 batch.status = "Sedang Berjalan";
                 saveBatchesStorage();
                 renderAll();
+                closeModal('modal-edit-date');
+            } else {
+                alert("Sila pilih tarikh yang sah.");
             }
         }
 
@@ -609,31 +639,21 @@
             const variety = appData.settings.variety;
             const days = varietyDays[variety] || 70;
             document.getElementById('lbl-variety-name').innerText = variety;
-            document.getElementById('variety-info-desc').innerHTML = `Varieti <b>${variety}</b> mempunyai tempoh matang sekitar <b>${days} hari selepas semai</b> sebelum tuaian pertama bermula. Kitaran penanaman terbahagi kepada fasa semaian (0-14 hari), fasa pembesaran/vegetatif (15-45 hari), dan fasa pembungaan & berbuah (46 hari ke atas).`;
+            document.getElementById('variety-info-desc').innerHTML = `Varieti <b>${variety}</b> mempunyai tempoh matang sekitar <b>${days} hari selepas semai</b> sebelum tuaian pertama bermula.`;
 
             document.getElementById('lbl-fertilizer-mode').innerText = appData.settings.fertilizer;
             const fertContainer = document.getElementById('fertilizer-guide-content');
             
             if (appData.settings.fertilizer.includes("AB")) {
                 fertContainer.innerHTML = `
-                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50">
-                        <b>Minggu 1 - 3 (Anak Pokok):</b> EC 1.2 hingga 1.5 mS/cm. Fokus pembentukan akar dan daun awal.
-                    </div>
-                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50">
-                        <b>Minggu 4 - 8 (Vegetatif):</b> EC 1.8 hingga 2.2 mS/cm. Sokongan tumbesaran batang dan cabang.
-                    </div>
-                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50">
-                        <b>Minggu 9 ke atas (Berbuah):</b> EC 2.3 hingga 2.6 mS/cm. Fokus pembesaran buah dan kualiti warna.
-                    </div>
+                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50"><b>Minggu 1 - 3:</b> EC 1.2 - 1.5 mS/cm.</div>
+                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50"><b>Minggu 4 - 8:</b> EC 1.8 - 2.2 mS/cm.</div>
+                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50"><b>Minggu 9 ke atas:</b> EC 2.3 - 2.6 mS/cm.</div>
                 `;
             } else {
                 fertContainer.innerHTML = `
-                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50">
-                        <b>Minggu 2 - 4:</b> Gunakan baja NPK Granul seimbang (Contoh: NPK 15:15:15 atau 8:8:8) sebanyak 1 sudu teh setiap 2 minggu.
-                    </div>
-                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50">
-                        <b>Minggu 5 ke atas (Fasa Bunga/Buah):</b> Tukar kepada baja tinggi unsur Kalium (K) seperti NPK 12:12:17:2 untuk melebatkan buah.
-                    </div>
+                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50"><b>Minggu 2 - 4:</b> NPK Granul seimbang (15:15:15) 1 sudu teh setiap 2 minggu.</div>
+                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50"><b>Minggu 5 ke atas:</b> NPK tinggi unsur Kalium (12:12:17:2).</div>
                 `;
             }
         }
@@ -669,7 +689,7 @@
         function saveHarvestRecord(e) {
             e.preventDefault();
             const record = {
-                date: document.getElementById('harv-date').value,
+                date: document.getElementById('harv-date-input'] || document.getElementById('harv-date').value,
                 weight: parseFloat(document.getElementById('harv-weight').value),
                 price: parseFloat(document.getElementById('harv-price').value)
             };
@@ -691,7 +711,6 @@
             document.getElementById(modalId).classList.add('hidden');
         }
 
-        // Fetch Cuaca Mengikut Lokasi Kebun Tetap (Open-Meteo API)
         function fetchWeatherData() {
             const lat = appData.settings.lat || "3.1390";
             const lon = appData.settings.lon || "101.6869";
@@ -704,12 +723,10 @@
                     if (data && data.current) {
                         document.getElementById('weather-temp').innerText = `${data.current.temperature_2m}°C`;
                         document.getElementById('weather-humidity').innerText = `${data.current.relative_humidity_2m}%`;
-                        
-                        // Simple weather code interpreter
                         let code = data.current.weather_code;
                         let condText = "Cerah / Baik";
                         if (code >= 1 && code <= 3) condText = "Berawan Separa";
-                        if (code >= 51 && code >= 67) condText = "Hujan ReNYAI / Lebat";
+                        if (code >= 51 && code >= 67) condText = "Hujan";
                         document.getElementById('weather-condition').innerText = condText;
                     }
                 })
