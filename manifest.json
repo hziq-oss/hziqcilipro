@@ -1,0 +1,24 @@
+{
+  "name": "CiliPro - Pengurusan Penanaman Cili",
+  "short_name": "CiliPro",
+  "description": "Sistem Aplikasi Pengurusan Kebun Cili, Rekod Batch, Kalkulator Baja AB dan Cuaca GPS Live",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#16a34a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1202/1202125.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1202/1202125.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
