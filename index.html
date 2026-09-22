@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CiliPro - Sistem Pengurusan Cili Malaysia</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -18,15 +17,12 @@
             }
         }
     </script>
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#16a34a">
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased pb-24">
 
-    <!-- HEADER / TOPBAR -->
     <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 flex justify-between items-center shadow-md">
         <div class="flex items-center space-x-2">
             <div class="bg-primary-600 text-white p-2 rounded-xl shadow-lg shadow-primary-600/30">
@@ -44,14 +40,10 @@
         </div>
     </header>
 
-    <!-- MAIN CONTAINER & TABS -->
     <main class="max-w-4xl mx-auto p-4">
-
-        <!-- TAB 1: PAPAN PEMUKA (DASHBOARD) -->
+        <!-- TAB 1: DASHBOARD -->
         <div id="tab-dashboard" class="tab-content space-y-5">
-            <!-- Widget Cuaca Lokasi Kebun -->
             <div class="bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700/60 rounded-2xl p-4 shadow-lg relative overflow-hidden">
-                <div class="absolute right-0 top-0 translate-x-4 -translate-y-4 w-32 h-32 bg-primary-500/10 rounded-full blur-2xl pointer-events-none"></div>
                 <div class="flex justify-between items-start">
                     <div>
                         <span class="text-xs font-medium uppercase tracking-wider text-primary-400 flex items-center gap-1.5">
@@ -67,7 +59,6 @@
                 </div>
             </div>
 
-            <!-- Kad Ringkasan Utama -->
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
                     <div class="text-slate-400 text-xs font-medium flex items-center gap-1.5">
@@ -85,7 +76,6 @@
                 </div>
             </div>
 
-            <!-- Fasa & Tugasan Terkini -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
                 <h3 class="font-bold text-slate-200 text-sm flex items-center gap-2 border-b border-slate-800 pb-2">
                     <i class="fa-solid fa-list-check text-primary-500"></i> Cadangan Tugasan & Penyelenggaraan Hari Ini
@@ -96,7 +86,7 @@
             </div>
         </div>
 
-        <!-- TAB 2: KEBUN & MULTI-BATCH -->
+        <!-- TAB 2: KEBUN -->
         <div id="tab-garden" class="tab-content space-y-4 hidden">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between items-center shadow-sm">
                 <div>
@@ -107,58 +97,26 @@
                     <i class="fa-solid fa-plus"></i> Tambah Batch
                 </button>
             </div>
-
-            <div id="batch-list-container" class="space-y-3">
-                <!-- Senarai batch dijana dinamik -->
-            </div>
+            <div id="batch-list-container" class="space-y-3"></div>
         </div>
 
-        <!-- TAB 3: INFO & JADUAL (FAZA & BAJA) -->
+        <!-- TAB 3: JADUAL -->
         <div id="tab-schedule" class="tab-content space-y-4 hidden">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
                 <h3 class="font-bold text-white text-sm flex items-center gap-2">
                     <i class="fa-solid fa-calendar-days text-primary-500"></i> Panduan Kitaran & Fasa Cili (<span id="lbl-variety-name">-</span>)
                 </h3>
-                <div class="text-xs text-slate-400 leading-relaxed" id="variety-info-desc">
-                    Pilih varieti pada tetapan kebun untuk melihat maklumat terperinci.
-                </div>
+                <div class="text-xs text-slate-400 leading-relaxed" id="variety-info-desc"></div>
             </div>
-
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
                 <h3 class="font-bold text-white text-sm flex items-center gap-2">
                     <i class="fa-solid fa-bottle-droplet text-primary-500"></i> Panduan Pemakanan (<span id="lbl-fertilizer-mode">-</span>)
                 </h3>
-                <div id="fertilizer-guide-content" class="text-xs text-slate-300 space-y-2">
-                    <!-- Kandungan panduan baja dinamik -->
-                </div>
-            </div>
-
-            <!-- Katalog Penyakit & Perosak -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
-                <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-shield-virus text-rose-500"></i> Katalog Penyakit & Perosak Utama
-                </h3>
-                <div class="space-y-3 text-xs text-slate-300">
-                    <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
-                        <div class="font-bold text-rose-400">1. Antraknos (Kulapuk Buah / Bintik Hitam)</div>
-                        <div class="text-slate-400 mt-1">Gejala: Bintik lekuk basah pada buah masak, bertukar hitam.</div>
-                        <div class="text-slate-200 mt-1">Rawatan: Sembur racun kulat perantaraan seperti *Chlorothalonil* atau *Difenoconazole*.</div>
-                    </div>
-                    <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
-                        <div class="font-bold text-rose-400">2. Virus Keriting Daun (Geminivirus)</div>
-                        <div class="text-slate-400 mt-1">Gejala: Daun berkerekot, bertompok kuning, pokok terbantut.</div>
-                        <div class="text-slate-200 mt-1">Rawatan: Kawal vektor lalat putih menggunakan racun *Imidacloprid* / *Abamectin*. Musnahkan pokok teruk.</div>
-                    </div>
-                    <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
-                        <div class="font-bold text-rose-400">3. Hamama Merah (Spider Mites)</div>
-                        <div class="text-slate-400 mt-1">Gejala: Daun berbintik halus kuning kekuningan, bawah daun berhabuk halus.</div>
-                        <div class="text-slate-200 mt-1">Rawatan: Sembur mitisid seperti *Pyridaben* atau *Spiromesifen*.</div>
-                    </div>
-                </div>
+                <div id="fertilizer-guide-content" class="text-xs text-slate-300 space-y-2"></div>
             </div>
         </div>
 
-        <!-- TAB 4: KEWANGAN & HASIL -->
+        <!-- TAB 4: KEWANGAN -->
         <div id="tab-finance" class="tab-content space-y-4 hidden">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
                 <div class="flex justify-between items-center">
@@ -179,32 +137,28 @@
                             </tr>
                         </thead>
                         <tbody id="harvest-table-body" class="divide-y divide-slate-800">
-                            <tr>
-                                <td colspan="5" class="p-4 text-center text-slate-500">Tiada rekod jualan lagi.</td>
-                            </tr>
+                            <tr><td colspan="5" class="p-4 text-center text-slate-500">Tiada rekod jualan lagi.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 5: TETAPAN KEBUN (SETTINGS) -->
+        <!-- TAB 5: TETAPAN -->
         <div id="tab-settings" class="tab-content space-y-4 hidden">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-4">
                 <h3 class="font-bold text-white text-base border-b border-slate-800 pb-2">Konfigurasi & Tetapan Kebun</h3>
-                
                 <form id="settings-form" onsubmit="saveSettings(event)" class="space-y-3 text-xs">
                     <div>
                         <label class="block text-slate-400 font-medium mb-1">Varieti Cili</label>
                         <select id="set-variety" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white">
-                            <option value="Cili Kulai (F1/568)">Cili Kulai (F1/568) - Tempoh Tuai ~70 Hari</option>
-                            <option value="Cili Centil">Cili Centil - Tempoh Tuai ~65 Hari</option>
-                            <option value="Cili Bara">Cili Bara / Melaka - Tempoh Tuai ~60 Hari</option>
-                            <option value="Cili Api Kampung">Cili Api Kampung - Tempoh Tuai ~75 Hari</option>
-                            <option value="Cili Solok">Cili Solok - Tempoh Tuai ~70 Hari</option>
+                            <option value="Cili Kulai (F1/568)">Cili Kulai (F1/568)</option>
+                            <option value="Cili Centil">Cili Centil</option>
+                            <option value="Cili Bara">Cili Bara</option>
+                            <option value="Cili Api Kampung">Cili Api Kampung</option>
+                            <option value="Cili Solok">Cili Solok</option>
                         </select>
                     </div>
-
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-slate-400 font-medium mb-1">Jumlah Kapasiti Polibeg</label>
@@ -215,50 +169,36 @@
                             <input type="number" id="set-batch-size" min="1" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" required>
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-slate-400 font-medium mb-1">Sistem Pemakanan / Baja</label>
                         <select id="set-fertilizer" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white">
                             <option value="Baja AB (Fertigasi)">Sistem Fertigasi (Baja AB Larutan)</option>
-                            <option value="Baja Granul NPK">Baja Granul / NPK Tanah (Contoh: NPK 8:8:8 / 15:15:15)</option>
+                            <option value="Baja Granul NPK">Baja Granul / NPK Tanah</option>
                         </select>
                     </div>
-
                     <div>
                         <label class="block text-slate-400 font-medium mb-1">Masa Siraman Automatik / Pam</label>
-                        <input type="text" id="set-watering" placeholder="Contoh: 4 kali sehari (8 pagi, 12 tgh, 3 ptg, 5 ptg)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" required>
+                        <input type="text" id="set-watering" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" required>
                     </div>
-
-                    <!-- TETAPAN LOKASI KEBUN MANUAL -->
-                    <div class="pt-2 border-t border-slate-800 space-y-2">
-                        <label class="block text-slate-300 font-semibold">Lokasi Tapak Kebun (Cuaca Tetap)</label>
-                        <p class="text-[11px] text-slate-400">Masukkan koordinat GPS kebun anda supaya widget cuaca sentiasa merujuk kepada lokasi kebun walaupun anda bergerak.</p>
-                        
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-slate-400 mb-1">Latitud (Latitude)</label>
-                                <input type="text" id="set-lat" placeholder="Contoh: 3.1390" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white">
-                            </div>
-                            <div>
-                                <label class="block text-slate-400 mb-1">Longitud (Longitude)</label>
-                                <input type="text" id="set-lon" placeholder="Contoh: 101.6869" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white">
-                            </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Latitud</label>
+                            <input type="text" id="set-lat" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white">
                         </div>
-                        <button type="button" onclick="detectCurrentGPS()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs py-2 rounded-xl border border-slate-700 transition flex items-center justify-center gap-1.5 mt-1">
-                            <i class="fa-solid fa-location-crosshairs text-primary-500"></i> Ambil Koordinat GPS Semasa Saya
-                        </button>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Longitud</label>
+                            <input type="text" id="set-lon" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white">
+                        </div>
                     </div>
-
                     <button type="submit" class="w-full bg-primary-600 hover:bg-primary-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-primary-600/20 mt-3">
                         Simpan & Jana Semula Batch Kebun
                     </button>
                 </form>
             </div>
         </div>
-
     </main>
 
-    <!-- BOTTOM NAVIGATION BAR -->
+    <!-- BOTTOM NAVIGATION -->
     <nav class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 z-50 max-w-4xl mx-auto flex justify-around py-2 px-1">
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center flex-1 py-1 text-primary-500 transition">
             <i class="fa-solid fa-chart-pie text-lg"></i>
@@ -282,7 +222,7 @@
         </button>
     </nav>
 
-    <!-- MODAL: KEMAS KINI POKOK HIDUP -->
+    <!-- MODAL UPDATE POKOK -->
     <div id="modal-update-plants" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
             <h3 class="font-bold text-white text-base">Kemas Kini Pokok Hidup</h3>
@@ -299,7 +239,7 @@
         </div>
     </div>
 
-    <!-- MODAL: TUKAR / EDIT TARIKH SEMAI -->
+    <!-- MODAL EDIT TARIKH -->
     <div id="modal-edit-date" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
             <h3 class="font-bold text-white text-base">Tetapkan Tarikh Semai</h3>
@@ -316,7 +256,7 @@
         </div>
     </div>
 
-    <!-- MODAL: CATAT JUALAN -->
+    <!-- MODAL HARVEST -->
     <div id="modal-harvest" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
             <h3 class="font-bold text-white text-base">Catat Hasil Jualan</h3>
@@ -341,14 +281,13 @@
         </div>
     </div>
 
-    <!-- MAIN JAVASCRIPT LOGIC -->
     <script>
         const DEFAULT_SETTINGS = {
             variety: "Cili Kulai (F1/568)",
             capacity: 48,
             batchSize: 12,
             fertilizer: "Baja AB (Fertigasi)",
-            watering: "4 kali sehari (Pagi, Tengahari, Petang, Malam)",
+            watering: "4 kali sehari",
             lat: "3.1390",
             lon: "101.6869"
         };
@@ -376,7 +315,8 @@
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const target = document.getElementById(`tab-${tabId}`);
+            if (target) target.classList.remove('hidden');
 
             ['dashboard', 'garden', 'schedule', 'finance', 'settings'].forEach(t => {
                 const navBtn = document.getElementById(`nav-${t}`);
@@ -401,20 +341,6 @@
             document.getElementById('set-watering').value = appData.settings.watering;
             document.getElementById('set-lat').value = appData.settings.lat || '';
             document.getElementById('set-lon').value = appData.settings.lon || '';
-        }
-
-        function detectCurrentGPS() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(position => {
-                    document.getElementById('set-lat').value = position.coords.latitude.toFixed(4);
-                    document.getElementById('set-lon').value = position.coords.longitude.toFixed(4);
-                    alert("Koordinat GPS berjaya dikesan!");
-                }, () => {
-                    alert("Gagal mengesan lokasi GPS.");
-                });
-            } else {
-                alert("Geolocation tidak disokong.");
-            }
         }
 
         function saveSettings(e) {
@@ -482,53 +408,38 @@
 
         function renderDashboard() {
             document.getElementById('header-sub-info').innerText = `${appData.settings.variety} • ${appData.settings.fertilizer}`;
-            
-            let activeCount = 0;
-            let totalRev = 0;
-            let totalHarvKg = 0;
+            let activeCount = 0, totalRev = 0, totalHarvKg = 0;
 
             appData.batches.forEach(b => {
-                if (b.status === "Sedang Berjalan") {
-                    activeCount += parseInt(b.survivingCount || 0);
-                }
+                if (b.status === "Sedang Berjalan") activeCount += parseInt(b.survivingCount || 0);
             });
-
             appData.harvests.forEach(h => {
                 totalRev += (h.weight * h.price);
                 totalHarvKg += parseFloat(h.weight);
             });
 
-            const usagePct = Math.round((activeCount / appData.settings.capacity) * 100);
+            const usagePct = Math.round((activeCount / appData.settings.capacity) * 100) || 0;
             document.getElementById('stat-active-plants').innerText = activeCount;
             document.getElementById('stat-polybag-usage').innerText = `${usagePct}%`;
             document.getElementById('stat-total-revenue').innerText = `RM ${totalRev.toFixed(2)}`;
             document.getElementById('stat-total-harvest').innerText = `Hasil: ${totalHarvKg.toFixed(1)} kg`;
 
             const taskContainer = document.getElementById('dashboard-tasks-container');
-            let tasksHtml = "";
             let activeBatches = appData.batches.filter(b => b.status === "Sedang Berjalan");
 
             if (activeBatches.length === 0) {
-                tasksHtml = `<div class="p-3 bg-slate-800/50 rounded-xl text-slate-400">Tiada batch aktif sekarang. Sila mulakan semaian pada menu <b>Kebun</b>.</div>`;
+                taskContainer.innerHTML = `<div class="p-3 bg-slate-800/50 rounded-xl text-slate-400">Tiada batch aktif sekarang. Sila mulakan semaian pada menu <b>Kebun</b>.</div>`;
             } else {
-                tasksHtml += `<div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50">
-                    <div class="font-bold text-primary-400">Siraman Harian</div>
-                    <div class="text-slate-300 mt-0.5">${appData.settings.watering}</div>
-                </div>`;
-
-                if (appData.settings.fertilizer.includes("AB")) {
-                    tasksHtml += `<div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50">
-                        <div class="font-bold text-primary-400">Kawalan Baja AB (Fertigasi)</div>
-                        <div class="text-slate-300 mt-0.5">Semak bacaan EC air baja (Target: 1.5 - 2.5 mS/cm) & pH (5.5 - 6.5) setiap pagi.</div>
+                taskContainer.innerHTML = `
+                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50">
+                        <div class="font-bold text-primary-400">Siraman Harian</div>
+                        <div class="text-slate-300 mt-0.5">${appData.settings.watering}</div>
+                    </div>
+                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50">
+                        <div class="font-bold text-primary-400">Sistem Pemakanan</div>
+                        <div class="text-slate-300 mt-0.5">${appData.settings.fertilizer}</div>
                     </div>`;
-                } else {
-                    tasksHtml += `<div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50">
-                        <div class="font-bold text-primary-400">Kawalan Baja Granul NPK</div>
-                        <div class="text-slate-300 mt-0.5">Tabur 1 sudu teh baja NPK setiap 2 minggu sekali di sekeliling pangkal polibeg.</div>
-                    </div>`;
-                }
             }
-            taskContainer.innerHTML = tasksHtml;
         }
 
         function renderGardenBatches() {
@@ -640,21 +551,13 @@
             const days = varietyDays[variety] || 70;
             document.getElementById('lbl-variety-name').innerText = variety;
             document.getElementById('variety-info-desc').innerHTML = `Varieti <b>${variety}</b> mempunyai tempoh matang sekitar <b>${days} hari selepas semai</b> sebelum tuaian pertama bermula.`;
-
             document.getElementById('lbl-fertilizer-mode').innerText = appData.settings.fertilizer;
-            const fertContainer = document.getElementById('fertilizer-guide-content');
             
+            const fertContainer = document.getElementById('fertilizer-guide-content');
             if (appData.settings.fertilizer.includes("AB")) {
-                fertContainer.innerHTML = `
-                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50"><b>Minggu 1 - 3:</b> EC 1.2 - 1.5 mS/cm.</div>
-                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50"><b>Minggu 4 - 8:</b> EC 1.8 - 2.2 mS/cm.</div>
-                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50"><b>Minggu 9 ke atas:</b> EC 2.3 - 2.6 mS/cm.</div>
-                `;
+                fertContainer.innerHTML = `<div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50"><b>Panduan Fertigasi:</b> Kawal bacaan EC air baja secara berkala mengikut fesyen tumbesaran pokok.</div>`;
             } else {
-                fertContainer.innerHTML = `
-                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50"><b>Minggu 2 - 4:</b> NPK Granul seimbang (15:15:15) 1 sudu teh setiap 2 minggu.</div>
-                    <div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50"><b>Minggu 5 ke atas:</b> NPK tinggi unsur Kalium (12:12:17:2).</div>
-                `;
+                fertContainer.innerHTML = `<div class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50"><b>Panduan Granul:</b> Tabur baja NPK secukupnya di sekeliling pangkal mengikut jadual mingguan.</div>`;
             }
         }
 
@@ -689,7 +592,7 @@
         function saveHarvestRecord(e) {
             e.preventDefault();
             const record = {
-                date: document.getElementById('harv-date-input'] || document.getElementById('harv-date').value,
+                date: document.getElementById('harv-date').value,
                 weight: parseFloat(document.getElementById('harv-weight').value),
                 price: parseFloat(document.getElementById('harv-price').value)
             };
@@ -714,7 +617,6 @@
         function fetchWeatherData() {
             const lat = appData.settings.lat || "3.1390";
             const lon = appData.settings.lon || "101.6869";
-            
             document.getElementById('weather-location-label').innerText = `Lokasi Kebun (${lat}, ${lon})`;
 
             fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code`)
@@ -726,7 +628,7 @@
                         let code = data.current.weather_code;
                         let condText = "Cerah / Baik";
                         if (code >= 1 && code <= 3) condText = "Berawan Separa";
-                        if (code >= 51 && code >= 67) condText = "Hujan";
+                        if (code >= 51) condText = "Hujan";
                         document.getElementById('weather-condition').innerText = condText;
                     }
                 })
