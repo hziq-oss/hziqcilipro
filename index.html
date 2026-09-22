@@ -1,734 +1,722 @@
 <!DOCTYPE html>
-<html lang="ms" class="dark">
+<html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CiliPro - Sistem Pengurusan & Jadual Penanaman Cili</title>
-
-    <!-- Tailwind CSS CDN -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CiliPro - Pengurusan Kebun Cili</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        chili: {
-                            50: '#fff1f2',
-                            100: '#ffe4e6',
-                            500: '#ef4444',
-                            600: '#dc2626',
-                            700: '#b91c1c',
-                        },
-                        agri: {
-                            50: '#f0fdf4',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            800: '#166534',
-                            900: '#14532d',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- FontAwesome & Google Fonts -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- PWA Manifest Link -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#16a34a">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1202/1202125.png">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            padding-bottom: 5rem; /* Space for bottom nav */
         }
-        /* Custom scrollbar for dashboard lists */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
         }
-        ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
+        .tab-content.active {
+            display: block;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
+        .nav-item.active {
+            color: #ef4444; /* Tailwind red-500 */
+        }
+        .nav-item.active .ph {
+            fill: #ef4444;
+            font-weight: bold;
+        }
+        
+        /* Custom Modal styling */
+        #custom-modal {
+            display: none;
+        }
+        #custom-modal.active {
+            display: flex;
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-agri-500 selection:text-white">
+<body class="text-gray-800 antialiased">
 
-    <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-chili-600 to-agri-500 flex items-center justify-center shadow-lg shadow-agri-500/20">
-                    <i class="fa-solid font-bold fa-pepper-hot text-xl text-white"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                        CiliPro <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-agri-500/10 text-agri-500 border border-agri-500/20">v2.5 PWA</span>
-                    </h1>
-                    <p class="text-xs text-slate-400 hidden sm:block">Pengurusan & Jadual Penanaman Cili Pintar</p>
-                </div>
-            </div>
-
-            <!-- Header Action Controls -->
-            <div class="flex items-center gap-2 sm:gap-4">
-                <!-- Status Sync / Offline Indicator -->
-                <div id="pwaSyncBadge" class="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span id="syncStatusText" class="hidden sm:inline">Mod Offline-Sedia</span>
-                </div>
-
-                <!-- Export / Backup Data Button -->
-                <button onclick="exportData()" title="Eksport Sandaran Data" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
-                    <i class="fa-solid fa-download"></i>
-                </button>
+    <header class="bg-red-600 text-white p-4 shadow-md sticky top-0 z-40">
+        <div class="flex justify-between items-center max-w-md mx-auto">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <i class="ph ph-pepper text-2xl"></i> CiliPro
+            </h1>
+            <div id="weather-mini" class="text-sm bg-red-700 px-2 py-1 rounded shadow-inner">
+                <i class="ph ph-spinner animate-spin"></i> Cuaca...
             </div>
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <main class="max-w-md mx-auto p-4">
 
-        <!-- Top Overview Grid: Weather & Farm Quick Stats -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- TAB 1: Papan Pemuka (Dashboard) -->
+        <section id="tab-dashboard" class="tab-content active space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">Papan Pemuka</h2>
             
-            <!-- Live Weather & GPS Widget -->
-            <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 flex flex-col justify-between shadow-xl relative overflow-hidden backdrop-blur-sm">
-                <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-agri-500/10 rounded-full blur-2xl pointer-events-none"></div>
-                <div>
-                    <div class="flex justify-between items-start mb-3">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
+                    <i class="ph ph-plant text-3xl text-green-500 mb-2"></i>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide">Pokok Hidup</p>
+                    <p class="text-2xl font-bold text-gray-800" id="dash-total-trees">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
+                    <i class="ph ph-basket text-3xl text-orange-500 mb-2"></i>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide">Anggaran Tuai</p>
+                    <p class="text-sm font-bold text-gray-800 mt-1" id="dash-harvest-date">-</p>
+                </div>
+            </div>
+
+            <!-- Cadangan Tugasan Harian -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-blue-50 border-b border-blue-100 p-3 flex items-center gap-2">
+                    <i class="ph ph-check-circle text-blue-600 text-xl"></i>
+                    <h3 class="font-bold text-blue-900">Tugasan & Penyelenggaraan Hari Ini</h3>
+                </div>
+                <div class="p-4">
+                    <ul id="daily-tasks-list" class="space-y-3">
+                        <li class="text-sm text-gray-500 text-center py-2">Sila tetapkan kebun & tambah batch untuk melihat tugasan.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Weather Widget -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                <h3 class="font-bold text-gray-700 mb-2 flex items-center gap-2">
+                    <i class="ph ph-cloud-sun text-xl text-gray-500"></i> Maklumat Cuaca Lokal
+                </h3>
+                <div id="weather-details" class="text-sm text-gray-600">
+                    Mendapatkan lokasi anda untuk cuaca...
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: Kebun & Batch -->
+        <section id="tab-kebun" class="tab-content space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">Kebun & Batch</h2>
+
+            <!-- Tetapan Kebun Form -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <i class="ph ph-gear text-lg text-gray-500"></i> Tetapan Kebun
+                </h3>
+                <form id="settings-form" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <span class="text-xs uppercase font-bold tracking-wider text-agri-500 flex items-center gap-1.5">
-                                <i class="fa-solid fa-location-dot"></i> Cuaca Kebun (GPS Live)
-                            </span>
-                            <h2 id="weatherLocation" class="text-lg font-semibold text-white mt-1">Mengesan Lokasi...</h2>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Kapasiti Polibeg</label>
+                            <input type="number" id="set-capacity" class="w-full border rounded-lg p-2 text-sm focus:ring-red-500 focus:border-red-500" required>
                         </div>
-                        <button onclick="fetchWeatherData()" class="text-slate-400 hover:text-white transition p-1">
-                            <i class="fa-solid fa-arrows-rotate text-sm"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="flex items-center justify-between my-2">
-                        <div class="flex items-center gap-3">
-                            <i id="weatherIcon" class="fa-solid fa-cloud-sun text-4xl text-amber-400"></i>
-                            <div>
-                                <div id="weatherTemp" class="text-3xl font-extrabold text-white">--°C</div>
-                                <div id="weatherCondition" class="text-xs text-slate-400">Memuatkan...</div>
-                            </div>
-                        </div>
-                        <div class="text-right text-xs space-y-1 text-slate-300">
-                            <div><i class="fa-solid fa-droplet text-blue-400 w-4"></i> Kelembapan: <span id="weatherHumidity">--%</span></div>
-                            <div><i class="fa-solid fa-wind text-slate-400 w-4"></i> Angin: <span id="weatherWind">-- km/h</span></div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Pokok per Batch</label>
+                            <input type="number" id="set-batch-size" class="w-full border rounded-lg p-2 text-sm focus:ring-red-500 focus:border-red-500" required>
                         </div>
                     </div>
-                </div>
-                
-                <div id="weatherAdvisory" class="mt-3 pt-3 border-t border-slate-700/50 text-xs text-amber-300 flex items-center gap-2">
-                    <i class="fa-solid fa-triangle-exclamation text-amber-400 shrink-0"></i>
-                    <span>Sistem sedia menerima maklumat cuaca setempat.</span>
-                </div>
-            </div>
-
-            <!-- Quick Batch Summary Cards -->
-            <div class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 flex flex-col justify-between">
-                    <span class="text-xs text-slate-400 font-medium">Jumlah Batch</span>
-                    <div id="statTotalBatches" class="text-2xl font-bold text-white my-1">0</div>
-                    <span class="text-xs text-agri-500"><i class="fa-solid fa-layer-group"></i> Aktif & Arkib</span>
-                </div>
-                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 flex flex-col justify-between">
-                    <span class="text-xs text-slate-400 font-medium">Pokok Hidup</span>
-                    <div id="statLiveTrees" class="text-2xl font-bold text-emerald-400 my-1">0</div>
-                    <span class="text-xs text-slate-400"><i class="fa-solid fa-tree"></i> Dalam Kebun</span>
-                </div>
-                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 flex flex-col justify-between">
-                    <span class="text-xs text-slate-400 font-medium">Jumlah Hasil</span>
-                    <div id="statTotalHarvest" class="text-2xl font-bold text-amber-400 my-1">0.0 kg</div>
-                    <span class="text-xs text-slate-400"><i class="fa-solid fa-basket-shopping"></i> Kategori Terumpul</span>
-                </div>
-                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 flex flex-col justify-between">
-                    <span class="text-xs text-slate-400 font-medium">Jumlah Jualan</span>
-                    <div id="statTotalRevenue" class="text-2xl font-bold text-chili-500 my-1">RM 0.00</div>
-                    <span class="text-xs text-slate-400"><i class="fa-solid fa-wallet"></i> Pendapatan Kasar</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Navigation Tabs -->
-        <div class="flex border-b border-slate-800 overflow-x-auto no-scrollbar gap-2">
-            <button onclick="switchTab('batches')" id="tabBtn-batches" class="tab-btn px-5 py-3 font-medium text-sm rounded-t-xl transition border-b-2 border-agri-500 text-agri-500 bg-slate-800/40 flex items-center gap-2 whitespace-nowrap">
-                <i class="fa-solid fa-list-check"></i> Pengurusan Batch
-            </button>
-            <button onclick="switchTab('calculator')" id="tabBtn-calculator" class="tab-btn px-5 py-3 font-medium text-sm rounded-t-xl transition border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
-                <i class="fa-solid fa-calculator"></i> Kalkulator Baja (AB / NPK)
-            </button>
-            <button onclick="switchTab('varieties')" id="tabBtn-varieties" class="tab-btn px-5 py-3 font-medium text-sm rounded-t-xl transition border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
-                <i class="fa-solid fa-seedling"></i> Info Varieti Cili
-            </button>
-        </div>
-
-        <!-- TAB CONTENT 1: BATCH MANAGEMENT -->
-        <section id="tab-batches" class="space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-lg font-bold text-white">Senarai Batch Penanaman</h2>
-                    <p class="text-xs text-slate-400">Uruskan jadual, rekod pokok mati, dan kutipan hasil setiap batch.</p>
-                </div>
-                <button onclick="openNewBatchModal()" class="px-4 py-2.5 bg-agri-600 hover:bg-agri-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-agri-600/20 flex items-center justify-center gap-2 transition">
-                    <i class="fa-solid fa-plus"></i> Tambah Batch Baru
-                </button>
-            </div>
-
-            <!-- Batch Container -->
-            <div id="batchListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Batch cards inserted dynamically via JavaScript -->
-            </div>
-        </section>
-
-        <!-- TAB CONTENT 2: FERTILIZER CALCULATOR -->
-        <section id="tab-calculator" class="hidden space-y-6">
-            <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 shadow-xl max-w-3xl mx-auto space-y-6">
-                <div>
-                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-flask text-agri-500"></i> Kalkulator Formulasi Baja Cili
-                    </h2>
-                    <p class="text-xs text-slate-400">Kira kepekatan EC & nisbah bancuhan stok Baja AB / Granul NPK mengikut kuantiti pokok.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-2">Jenis Baja / Sistem</label>
-                        <select id="calcType" onchange="calculateFertilizer()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-agri-500">
-                            <option value="fertigasi">Fertigasi (Baja AB Cecair)</option>
-                            <option value="npk">Siraman / Tabur (NPK Granul)</option>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Varieti Cili</label>
+                        <select id="set-variety" class="w-full border rounded-lg p-2 text-sm">
+                            <option value="Kulai 461">Kulai 461</option>
+                            <option value="Akar">Akar (Cili Padi)</option>
+                            <option value="Centil">Centil</option>
+                            <option value="Bara">Bara</option>
                         </select>
                     </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-2">Fasa Pertumbuhan</label>
-                        <select id="calcPhase" onchange="calculateFertilizer()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-agri-500">
-                            <option value="vegetative">Vegetatif / Awal (EC: 1.5 - 1.8)</option>
-                            <option value="flowering">Berbunga / Pembuahan (EC: 2.0 - 2.2)</option>
-                            <option value="harvesting">Puncak Hasil (EC: 2.3 - 2.6)</option>
-                        </select>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Jenis Baja</label>
+                            <select id="set-fertilizer" class="w-full border rounded-lg p-2 text-sm">
+                                <option value="AB">Baja AB (Fertigasi)</option>
+                                <option value="NPK">Granul NPK (Tanah)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Masa Auto Siram</label>
+                            <input type="time" id="set-watertime" class="w-full border rounded-lg p-2 text-sm">
+                        </div>
                     </div>
+                    <button type="submit" class="w-full bg-gray-800 text-white rounded-lg p-2 text-sm font-semibold hover:bg-gray-900 transition">Simpan Tetapan</button>
+                </form>
+            </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-2">Jumlah Pokok</label>
-                        <input type="number" id="calcTreeCount" value="100" min="1" oninput="calculateFertilizer()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-agri-500">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-2">Isipadu Air Siraman (Liter/Pokok/Hari)</label>
-                        <input type="number" id="calcWaterPerTree" value="1.5" step="0.1" oninput="calculateFertilizer()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-agri-500">
-                    </div>
+            <!-- Pengurusan Batch -->
+            <div>
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-gray-800 text-lg">Senarai Batch</h3>
+                    <button onclick="uiAddBatch()" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-sm font-semibold shadow flex items-center gap-1 hover:bg-red-600">
+                        <i class="ph ph-plus"></i> Tambah
+                    </button>
                 </div>
-
-                <!-- Calculator Results Box -->
-                <div class="p-5 bg-slate-900/80 border border-slate-700/80 rounded-xl space-y-3">
-                    <h3 class="text-xs uppercase font-bold text-agri-500 tracking-wider">Hasil Pengiraan Keperluan:</h3>
-                    
-                    <div id="calcResults" class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-                        <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700">
-                            <span class="text-xs text-slate-400 block">Jumlah Air Harian</span>
-                            <span id="resTotalWater" class="text-xl font-bold text-white">150 L</span>
-                        </div>
-                        <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700">
-                            <span id="resPekALabel" class="text-xs text-slate-400 block">Pek Stok A</span>
-                            <span id="resPekA" class="text-xl font-bold text-emerald-400">300 ml</span>
-                        </div>
-                        <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700">
-                            <span id="resPekBLabel" class="text-xs text-slate-400 block">Pek Stok B</span>
-                            <span id="resPekB" class="text-xl font-bold text-emerald-400">300 ml</span>
-                        </div>
-                    </div>
-
-                    <p id="calcNote" class="text-xs text-slate-400 italic pt-2">
-                        * Nota: Nisbah bancuhan anggaran standard stok pekat 1:100. Lakukan ujian EC meter secara berkala.
-                    </p>
+                <div id="batch-list" class="space-y-4">
+                    <!-- Batches rendered via JS -->
                 </div>
             </div>
         </section>
 
-        <!-- TAB CONTENT 3: CHILI VARIETIES INFO -->
-        <section id="tab-varieties" class="hidden space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Kulai 461 -->
-                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 space-y-3">
-                    <div class="w-full h-36 rounded-xl bg-slate-700/50 flex items-center justify-center overflow-hidden relative">
-                        <i class="fa-solid fa-pepper-hot text-6xl text-chili-600"></i>
-                        <span class="absolute top-2 right-2 bg-chili-600/90 text-white text-[10px] font-bold px-2 py-0.5 rounded">Popular</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-white">Cili Kulai 461 / Centil</h3>
-                    <p class="text-xs text-slate-300">Varieti paling popular bagi fertigasi komersial. Hasil tinggi, buah panjang & berkilat.</p>
-                    <ul class="text-xs text-slate-400 space-y-1 pt-2 border-t border-slate-700">
-                        <li><strong class="text-slate-200">Tempoh Matang:</strong> 75 - 85 hari</li>
-                        <li><strong class="text-slate-200">Potensi Hasil:</strong> 3.0 - 5.0 kg / pokok</li>
-                        <li><strong class="text-slate-200">Tahap Kepedasan:</strong> Tinggi (SHU 30k-50k)</li>
-                    </ul>
-                </div>
+        <!-- TAB 3: Baja & Info -->
+        <section id="tab-baja" class="tab-content space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">Baja & Info</h2>
 
-                <!-- Bara / Padi -->
-                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 space-y-3">
-                    <div class="w-full h-36 rounded-xl bg-slate-700/50 flex items-center justify-center overflow-hidden relative">
-                        <i class="fa-solid fa-pepper-hot text-6xl text-amber-500"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-white">Cili Padi Bara / Kampung</h3>
-                    <p class="text-xs text-slate-300">Saiz buah kecil, tegak mendongak. Mempunyai pasaran stabil dan harga yang sangat tinggi.</p>
-                    <ul class="text-xs text-slate-400 space-y-1 pt-2 border-t border-slate-700">
-                        <li><strong class="text-slate-200">Tempoh Matang:</strong> 80 - 90 hari</li>
-                        <li><strong class="text-slate-200">Potensi Hasil:</strong> 2.0 - 3.5 kg / pokok</li>
-                        <li><strong class="text-slate-200">Tahap Kepedasan:</strong> Sangat Tinggi</li>
-                    </ul>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                <h3 class="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                    <i class="ph ph-flask text-lg text-purple-500"></i> Jadual Nutrisi (Berdasarkan Tetapan)
+                </h3>
+                <div id="fertilizer-guide" class="text-sm text-gray-600 space-y-2">
+                    <!-- Filled by JS -->
                 </div>
+            </div>
 
-                <!-- Sakata 603 -->
-                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 space-y-3">
-                    <div class="w-full h-36 rounded-xl bg-slate-700/50 flex items-center justify-center overflow-hidden relative">
-                        <i class="fa-solid fa-pepper-hot text-6xl text-emerald-500"></i>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <i class="ph ph-bug text-lg text-red-500"></i> Katalog Perosak & Penyakit
+                </h3>
+                <div class="space-y-3">
+                    <div class="border rounded-lg p-3 bg-gray-50">
+                        <h4 class="font-semibold text-gray-800 text-sm">Lalat Putih (Whitefly)</h4>
+                        <p class="text-xs text-gray-600 mt-1">Pembawa virus kerinting. Kawalan: Semburan racun organik neem oil, perangkap gam kuning.</p>
                     </div>
-                    <h3 class="text-lg font-bold text-white">Cili Besar Sakata 603</h3>
-                    <p class="text-xs text-slate-300">Tahan penyakit layu bakteria. Buah tebal dan tahan lama untuk pengangkutan jarak jauh.</p>
-                    <ul class="text-xs text-slate-400 space-y-1 pt-2 border-t border-slate-700">
-                        <li><strong class="text-slate-200">Tempoh Matang:</strong> 70 - 80 hari</li>
-                        <li><strong class="text-slate-200">Potensi Hasil:</strong> 3.5 - 4.5 kg / pokok</li>
-                        <li><strong class="text-slate-200">Tahap Kepedasan:</strong> Sederhana</li>
-                    </ul>
+                    <div class="border rounded-lg p-3 bg-gray-50">
+                        <h4 class="font-semibold text-gray-800 text-sm">Antraknos (Bintik Berpusar)</h4>
+                        <p class="text-xs text-gray-600 mt-1">Buah membusuk hitam. Kawalan: Rawat benih, gunakan racun kulat (fungicide) berasaskan tembaga.</p>
+                    </div>
+                    <div class="border rounded-lg p-3 bg-gray-50">
+                        <h4 class="font-semibold text-gray-800 text-sm">Hama (Mites)</h4>
+                        <p class="text-xs text-gray-600 mt-1">Daun melengkung ke bawah. Kawalan: Racun hamama (miticide), pastikan kawasan tidak terlalu kering.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: Kewangan -->
+        <section id="tab-kewangan" class="tab-content space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">Kewangan & Hasil</h2>
+
+            <div class="bg-green-600 text-white p-5 rounded-xl shadow text-center">
+                <p class="text-sm font-semibold opacity-90 uppercase tracking-wider">Jumlah Jualan Terkumpul</p>
+                <p class="text-3xl font-bold mt-1" id="total-revenue">RM 0.00</p>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="font-bold text-gray-800 mb-3 text-sm">Rekod Jualan Baru</h3>
+                <form id="sales-form" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Tarikh Tuai/Jual</label>
+                        <input type="date" id="sale-date" class="w-full border rounded-lg p-2 text-sm focus:ring-green-500 focus:border-green-500" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Berat (KG)</label>
+                            <input type="number" step="0.01" id="sale-kg" class="w-full border rounded-lg p-2 text-sm focus:ring-green-500 focus:border-green-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Harga Semasa (RM/KG)</label>
+                            <input type="number" step="0.01" id="sale-price" class="w-full border rounded-lg p-2 text-sm focus:ring-green-500 focus:border-green-500" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 text-white rounded-lg p-2 text-sm font-semibold hover:bg-green-700 transition">Tambah Rekod</button>
+                </form>
+            </div>
+
+            <div>
+                <h3 class="font-bold text-gray-800 mb-2">Sejarah Jualan</h3>
+                <div id="sales-list" class="space-y-2">
+                    <!-- Filled by JS -->
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- Modal: Add New Batch -->
-    <div id="newBatchModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="text-lg font-bold text-white">Tambah Batch Penanaman</h3>
-                <button onclick="closeNewBatchModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <nav class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around pb-safe z-50">
+        <button class="nav-item active flex flex-col items-center py-3 w-1/4 text-gray-500 hover:text-red-500 transition" onclick="switchTab('dashboard', this)">
+            <i class="ph ph-squares-four text-2xl mb-1"></i>
+            <span class="text-[10px] font-semibold">Utama</span>
+        </button>
+        <button class="nav-item flex flex-col items-center py-3 w-1/4 text-gray-500 hover:text-red-500 transition" onclick="switchTab('kebun', this)">
+            <i class="ph ph-potted-plant text-2xl mb-1"></i>
+            <span class="text-[10px] font-semibold">Kebun</span>
+        </button>
+        <button class="nav-item flex flex-col items-center py-3 w-1/4 text-gray-500 hover:text-red-500 transition" onclick="switchTab('baja', this)">
+            <i class="ph ph-drop text-2xl mb-1"></i>
+            <span class="text-[10px] font-semibold">Baja</span>
+        </button>
+        <button class="nav-item flex flex-col items-center py-3 w-1/4 text-gray-500 hover:text-red-500 transition" onclick="switchTab('kewangan', this)">
+            <i class="ph ph-currency-circle-dollar text-2xl mb-1"></i>
+            <span class="text-[10px] font-semibold">Kewangan</span>
+        </button>
+    </nav>
+
+    <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div id="modal-header" class="bg-gray-100 p-3 border-b font-bold text-gray-800">Mesej</div>
+            <div id="modal-body" class="p-4 text-sm text-gray-600">
+                <!-- Content -->
             </div>
-            
-            <form id="newBatchForm" onsubmit="handleCreateBatch(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Nama / Kod Batch</label>
-                    <input type="text" id="batchNameInput" placeholder="Contoh: Batch A - Blok 1" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-agri-500">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Varieti Cili</label>
-                    <select id="batchVarietyInput" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-agri-500">
-                        <option value="Cili Kulai 461">Cili Kulai 461</option>
-                        <option value="Cili Padi Bara">Cili Padi Bara</option>
-                        <option value="Cili Sakata 603">Cili Sakata 603</option>
-                        <option value="Lain-lain">Lain-lain / Kampung</option>
-                    </select>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Jumlah Pokok Awal</label>
-                        <input type="number" id="batchTreesInput" min="1" value="100" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-agri-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Tarikh Semai/Tanam</label>
-                        <input type="date" id="batchDateInput" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-agri-500">
-                    </div>
-                </div>
-
-                <div class="pt-3 flex justify-end gap-2">
-                    <button type="button" onclick="closeNewBatchModal()" class="px-4 py-2 rounded-xl text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">Batal</button>
-                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-medium bg-agri-600 text-white hover:bg-agri-500">Simpan Batch</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal: Record Harvest & Tree Loss -->
-    <div id="logHarvestModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="text-lg font-bold text-white">Kemaskini Rekod Batch</h3>
-                <button onclick="closeHarvestModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <div class="p-3 border-t bg-gray-50 flex justify-end gap-2" id="modal-actions">
+                <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg text-sm font-semibold">Tutup</button>
             </div>
-            
-            <form id="harvestForm" onsubmit="handleSaveHarvest(event)" class="space-y-3">
-                <input type="hidden" id="activeBatchId">
-
-                <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700">
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Kematian Pokok Baharu (Jika ada)</label>
-                    <input type="number" id="newDeadTreesInput" min="0" value="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-chili-500">
-                    <span class="text-[10px] text-slate-400">Jumlah kematian akan menolak bilangan pokok hidup semasa.</span>
-                </div>
-
-                <div class="border-t border-slate-800 pt-3">
-                    <h4 class="text-xs font-bold text-agri-500 mb-2">Rekod Kutipan Hasil</h4>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-300 mb-1">Berat Hasil (kg)</label>
-                            <input type="number" id="harvestWeightInput" min="0" step="0.1" value="0.0" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-agri-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-300 mb-1">Nilai Jualan (RM)</label>
-                            <input type="number" id="harvestRevenueInput" min="0" step="0.5" value="0.00" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-agri-500">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pt-3 flex justify-end gap-2">
-                    <button type="button" onclick="closeHarvestModal()" class="px-4 py-2 rounded-xl text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">Batal</button>
-                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-medium bg-agri-600 text-white hover:bg-agri-500">Simpan Rekod</button>
-                </div>
-            </form>
         </div>
     </div>
 
     <script>
-        // Data State Store (LocalStorage-backed)
-        let appState = {
-            batches: []
+        const STORAGE_KEY = 'ciliProData';
+        
+        let appData = {
+            settings: {
+                capacity: 1000,
+                batchSize: 500,
+                variety: 'Kulai 461',
+                fertilizer: 'AB',
+                waterTime: '08:00'
+            },
+            batches: [],
+            sales: []
         };
 
-        // Initialize App on DOM Loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            loadState();
-            registerServiceWorker();
-            fetchWeatherData();
-            calculateFertilizer();
-            
-            // Default Today Date for Batch Modal
-            document.getElementById('batchDateInput').valueAsDate = new Date();
-        });
-
-        // Register Progressive Web App Service Worker
-        function registerServiceWorker() {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => {
-                        console.log('CiliPro SW Registered Successfully:', reg.scope);
-                    })
-                    .catch(err => {
-                        console.warn('SW Registration Failed:', err);
-                    });
-            }
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            updateUI();
         }
 
-        // LocalStorage Data Handlers
-        function loadState() {
-            const saved = localStorage.getItem('cilipro_data');
-            if (saved) {
+        function loadData() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) {
                 try {
-                    appState = JSON.parse(saved);
-                } catch (e) {
-                    console.error("Failed to parse local storage data", e);
+                    const parsed = JSON.parse(data);
+                    appData = { ...appData, ...parsed };
+                } catch(e) {
+                    console.error("Error parsing localstorage", e);
                 }
-            } else {
-                // Initial Default Demo Batch
-                appState.batches = [{
-                    id: 'batch-' + Date.now(),
-                    name: 'Batch Demo - Blok Utama',
-                    variety: 'Cili Kulai 461',
-                    initialTrees: 200,
-                    deadTrees: 4,
-                    startDate: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                    totalHarvestKg: 15.5,
-                    totalRevenueRM: 186.00
-                }];
-                saveState();
             }
-            renderBatches();
-            updateOverallStats();
         }
 
-        function saveState() {
-            localStorage.setItem('cilipro_data', JSON.stringify(appState));
-            renderBatches();
-            updateOverallStats();
+        function switchTab(tabId, el) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Show selected tab
+            document.getElementById('tab-' + tabId).classList.add('active');
+            
+            // Update nav icons
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.remove('active');
+            });
+            el.classList.add('active');
         }
 
-        // Export JSON Data Backup
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `CiliPro_Backup_${new Date().toISOString().split('T')[0]}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
+        function showMessage(title, message) {
+            document.getElementById('modal-header').innerText = title;
+            document.getElementById('modal-body').innerText = message;
+            document.getElementById('modal-actions').innerHTML = `<button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg text-sm font-semibold hover:bg-gray-300">Tutup</button>`;
+            document.getElementById('custom-modal').classList.add('active');
         }
 
-        // Navigation Tabs Controller
-        function switchTab(tabName) {
-            document.querySelectorAll('section[id^="tab-"]').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-agri-500', 'text-agri-500', 'bg-slate-800/40');
-                btn.classList.add('border-transparent', 'text-slate-400');
+        function showConfirm(title, message, onConfirm) {
+            document.getElementById('modal-header').innerText = title;
+            document.getElementById('modal-body').innerText = message;
+            
+            const actions = document.getElementById('modal-actions');
+            actions.innerHTML = `
+                <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg text-sm font-semibold hover:bg-gray-300">Batal</button>
+                <button id="modal-confirm-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700">Teruskan</button>
+            `;
+            
+            document.getElementById('modal-confirm-btn').onclick = () => {
+                onConfirm();
+                closeModal();
+            };
+            
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.remove('active');
+        }
+
+        function getPhaseInfo(startDateStr) {
+            if (!startDateStr) return { phase: 'Belum Mula', days: 0, progress: 0 };
+            
+            const start = new Date(startDateStr);
+            const today = new Date();
+            const diffTime = today - start;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays < 0) return { phase: 'Belum Mula', days: diffDays, progress: 0 };
+            
+            let phase = '';
+            let progress = 0;
+            // Life cycle of chilli ~150 days
+            if (diffDays <= 25) {
+                phase = 'Semaian';
+                progress = (diffDays / 25) * 20; // Up to 20%
+            } else if (diffDays <= 60) {
+                phase = 'Pindah Anak Pokok / Vegetatif';
+                progress = 20 + ((diffDays - 25) / 35) * 30; // 20% to 50%
+            } else if (diffDays <= 85) {
+                phase = 'Mula Berbunga';
+                progress = 50 + ((diffDays - 60) / 25) * 30; // 50% to 80%
+            } else {
+                phase = 'Berbuah & Tuai';
+                progress = 80 + Math.min(20, ((diffDays - 85) / 65) * 20); // 80% to 100%
+            }
+            
+            return { phase, days: diffDays, progress };
+        }
+
+        function updateDashboard() {
+            let totalLive = 0;
+            let earliestHarvest = null;
+            let tasks = [];
+            
+            // Base tasks depending on settings
+            if (appData.settings.fertilizer === 'AB') {
+                tasks.push("Periksa bacaan EC dan pH tangki baja. Pastikan sistem pengairan titis (dripper) tidak tersumbat.");
+            } else {
+                tasks.push("Pastikan tanah lembap sebelum membaja NPK. Rumpai di keliling polibeg/batas perlu dibersihkan.");
+            }
+
+            appData.batches.forEach(b => {
+                totalLive += parseInt(b.live);
+                
+                // Harvest estimation (approx 90 days from plant date)
+                if (b.date) {
+                    const start = new Date(b.date);
+                    const harvest = new Date(start);
+                    harvest.setDate(start.getDate() + 90);
+                    
+                    if (!earliestHarvest || harvest < earliestHarvest) {
+                        if(harvest > new Date()) earliestHarvest = harvest;
+                    }
+                    
+                    // Task logic based on phase
+                    const info = getPhaseInfo(b.date);
+                    if (info.days >= 0 && info.days <= 10) {
+                        tasks.push(`Batch ${b.id} (Hari ${info.days}): Semburan anti-kulat (Fungicide) pencegahan disyorkan.`);
+                    } else if (info.days > 20 && info.days <= 30) {
+                        tasks.push(`Batch ${b.id} (Hari ${info.days}): Persediaan pindah anak pokok. Pastikan media tanaman bersedia.`);
+                    } else if (info.days > 55 && info.days <= 65) {
+                        tasks.push(`Batch ${b.id} (Hari ${info.days}): Pokok mula berbunga. Tingkatkan sedikit kadar baja kalium (K). Pantau serangan lalat buah.`);
+                    } else if (info.days > 85 && info.days <= 95) {
+                        tasks.push(`Batch ${b.id} (Hari ${info.days}): Persediaan tuaian pertama! Sediakan bakul dan tenaga kerja.`);
+                    }
+                }
             });
 
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`tabBtn-${tabName}`);
-            activeBtn.classList.add('border-agri-500', 'text-agri-500', 'bg-slate-800/40');
-            activeBtn.classList.remove('border-transparent', 'text-slate-400');
-        }
-
-        // Fetch Live GPS Weather using Open-Meteo API
-        function fetchWeatherData() {
-            const locEl = document.getElementById('weatherLocation');
-            const tempEl = document.getElementById('weatherTemp');
-            const condEl = document.getElementById('weatherCondition');
-            const humEl = document.getElementById('weatherHumidity');
-            const windEl = document.getElementById('weatherWind');
-
-            if (!navigator.geolocation) {
-                locEl.innerText = "GPS Tidak Disokong";
-                return;
+            document.getElementById('dash-total-trees').innerText = totalLive;
+            
+            if (earliestHarvest) {
+                document.getElementById('dash-harvest-date').innerText = earliestHarvest.toLocaleDateString('ms-MY', { day: 'numeric', month: 'short', year: 'numeric' });
+            } else {
+                document.getElementById('dash-harvest-date').innerText = "Tiada Data";
             }
 
-            locEl.innerText = "Mendapatkan Koordinat...";
+            // Render tasks
+            const taskList = document.getElementById('daily-tasks-list');
+            taskList.innerHTML = '';
+            
+            if (appData.batches.length === 0) {
+                taskList.innerHTML = '<li class="text-sm text-gray-500 text-center py-2">Sila tetapkan kebun & tambah batch untuk melihat jadual.</li>';
+            } else {
+                tasks.forEach(t => {
+                    taskList.innerHTML += `<li class="flex items-start gap-2 text-sm text-gray-700 bg-gray-50 p-2 rounded border border-gray-100">
+                        <i class="ph ph-caret-circle-right text-blue-500 mt-0.5"></i> <span>${t}</span>
+                    </li>`;
+                });
+            }
+        }
 
-            navigator.geolocation.getCurrentPosition(
-                async (pos) => {
-                    const lat = pos.coords.latitude;
-                    const lon = pos.coords.longitude;
-                    locEl.innerText = `Lat: ${lat.toFixed(2)}, Lon: ${lon.toFixed(2)}`;
+        function initSettingsForm() {
+            document.getElementById('set-capacity').value = appData.settings.capacity;
+            document.getElementById('set-batch-size').value = appData.settings.batchSize;
+            document.getElementById('set-variety').value = appData.settings.variety;
+            document.getElementById('set-fertilizer').value = appData.settings.fertilizer;
+            document.getElementById('set-watertime').value = appData.settings.waterTime;
 
-                    try {
-                        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m`);
-                        const data = await res.json();
-                        
-                        if (data.current_weather) {
-                            const cw = data.current_weather;
-                            tempEl.innerText = `${cw.temperature}°C`;
-                            windEl.innerText = `${cw.windspeed} km/h`;
-                            condEl.innerText = cw.weathercode <= 3 ? 'Cerah / Berawan' : 'Potensi Hujan';
-                            humEl.innerText = data.hourly?.relativehumidity_2m?.[0] ? `${data.hourly.relativehumidity_2m[0]}%` : '75%';
-                        }
-                    } catch (err) {
-                        locEl.innerText = "Lokasi dikesan (Offline)";
-                        tempEl.innerText = "30°C";
-                        condEl.innerText = "Guna data anggaran";
-                    }
-                },
-                (err) => {
-                    locEl.innerText = "Kawasan Kebun Standard";
-                    tempEl.innerText = "31°C";
-                    condEl.innerText = "Cerah Berawan";
-                    humEl.innerText = "78%";
-                    windEl.innerText = "8 km/h";
-                }
-            );
+            document.getElementById('settings-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                appData.settings.capacity = document.getElementById('set-capacity').value;
+                appData.settings.batchSize = document.getElementById('set-batch-size').value;
+                appData.settings.variety = document.getElementById('set-variety').value;
+                appData.settings.fertilizer = document.getElementById('set-fertilizer').value;
+                appData.settings.waterTime = document.getElementById('set-watertime').value;
+                saveData();
+                showMessage("Berjaya", "Tetapan kebun telah disimpan.");
+            });
+        }
+
+        function uiAddBatch() {
+            // Provide a prompt modal for date
+            const today = new Date().toISOString().split('T')[0];
+            
+            document.getElementById('modal-header').innerText = "Tambah Batch Baru";
+            document.getElementById('modal-body').innerHTML = `
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Tarikh Mula Semaian (Hari ke-0)</label>
+                <input type="date" id="new-batch-date" class="w-full border rounded-lg p-2 text-sm mb-3" value="${today}">
+                <p class="text-xs text-gray-500">Saiz batch diambil dari tetapan: ${appData.settings.batchSize} pokok.</p>
+            `;
+            
+            const actions = document.getElementById('modal-actions');
+            actions.innerHTML = `
+                <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg text-sm font-semibold">Batal</button>
+                <button onclick="executeAddBatch()" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold">Cipta Batch</button>
+            `;
+            
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function executeAddBatch() {
+            const date = document.getElementById('new-batch-date').value;
+            if(!date) return;
+
+            const newId = appData.batches.length > 0 ? Math.max(...appData.batches.map(b=>b.id)) + 1 : 1;
+            appData.batches.push({
+                id: newId,
+                date: date,
+                initial: appData.settings.batchSize,
+                live: appData.settings.batchSize
+            });
+            saveData();
+            closeModal();
+        }
+
+        function updateMortality(id) {
+            const batch = appData.batches.find(b => b.id === id);
+            if(!batch) return;
+
+            document.getElementById('modal-header').innerText = `Kemas kini Pokok Batch ${id}`;
+            document.getElementById('modal-body').innerHTML = `
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Jumlah Pokok Masih Hidup</label>
+                <input type="number" id="update-live-count" class="w-full border rounded-lg p-2 text-sm" value="${batch.live}" max="${batch.initial}" min="0">
+            `;
+            
+            const actions = document.getElementById('modal-actions');
+            actions.innerHTML = `
+                <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg text-sm font-semibold">Batal</button>
+                <button onclick="saveMortality(${id})" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold">Simpan</button>
+            `;
+            
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function saveMortality(id) {
+            const batch = appData.batches.find(b => b.id === id);
+            const newVal = document.getElementById('update-live-count').value;
+            if(batch && newVal !== "") {
+                batch.live = Math.max(0, Math.min(batch.initial, parseInt(newVal)));
+                saveData();
+                closeModal();
+            }
+        }
+
+        function deleteBatch(id) {
+            showConfirm("Hapus Batch", `Adakah anda pasti mahu memadam Batch ${id}? Tindakan ini tidak boleh diundur.`, () => {
+                appData.batches = appData.batches.filter(b => b.id !== id);
+                saveData();
+            });
         }
 
         function renderBatches() {
-            const container = document.getElementById('batchListContainer');
-            container.innerHTML = '';
-
-            if (appState.batches.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full text-center py-12 text-slate-500 bg-slate-800/30 rounded-2xl border border-dashed border-slate-700">
-                        <i class="fa-solid fa-seedling text-4xl mb-2 text-slate-600"></i>
-                        <p class="text-sm">Tiada batch penanaman didaftarkan lagi.</p>
-                        <button onclick="openNewBatchModal()" class="mt-3 text-xs text-agri-500 hover:underline">Tambah Batch Pertama</button>
-                    </div>
-                `;
+            const list = document.getElementById('batch-list');
+            list.innerHTML = '';
+            
+            if (appData.batches.length === 0) {
+                list.innerHTML = '<div class="text-center text-sm text-gray-500 py-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">Tiada batch aktif. Sila tambah batch.</div>';
                 return;
             }
 
-            appState.batches.forEach(batch => {
-                const liveTrees = Math.max(0, batch.initialTrees - batch.deadTrees);
-                const startDate = new Date(batch.startDate);
-                const today = new Date();
-                const daysOld = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+            appData.batches.forEach(b => {
+                const info = getPhaseInfo(b.date);
+                const progressW = Math.min(100, Math.max(0, info.progress));
                 
-                // Estimate Phase
-                let phaseText = "Vegetatif";
-                let phaseBadge = "bg-blue-500/10 text-blue-400 border-blue-500/20";
-                if (daysOld > 75) {
-                    phaseText = "Kutipan Hasil";
-                    phaseBadge = "bg-amber-500/10 text-amber-400 border-amber-500/20";
-                } else if (daysOld > 40) {
-                    phaseText = "Berbunga/Pembuahan";
-                    phaseBadge = "bg-purple-500/10 text-purple-400 border-purple-500/20";
-                }
-
-                const cardHtml = `
-                    <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+                const card = `
+                <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-2">
                         <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <h3 class="text-base font-bold text-white">${batch.name}</h3>
-                                    <span class="text-xs text-slate-400">${batch.variety}</span>
-                                </div>
-                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full border ${phaseBadge}">
-                                    ${phaseText} (${daysOld} Hari)
-                                </span>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-2 my-3 text-xs bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                                <div>
-                                    <span class="text-slate-400 block">Pokok Hidup</span>
-                                    <strong class="text-emerald-400 text-sm">${liveTrees} / ${batch.initialTrees}</strong>
-                                </div>
-                                <div>
-                                    <span class="text-slate-400 block">Kematian</span>
-                                    <strong class="text-chili-500 text-sm">${batch.deadTrees} pokok</strong>
-                                </div>
-                                <div class="pt-1 border-t border-slate-800">
-                                    <span class="text-slate-400 block">Hasil Terumpul</span>
-                                    <strong class="text-amber-400">${(batch.totalHarvestKg || 0).toFixed(1)} kg</strong>
-                                </div>
-                                <div class="pt-1 border-t border-slate-800">
-                                    <span class="text-slate-400 block">Jumlah Jualan</span>
-                                    <strong class="text-white">RM ${(batch.totalRevenueRM || 0).toFixed(2)}</strong>
-                                </div>
-                            </div>
+                            <h4 class="font-bold text-gray-800">Batch ${b.id} <span class="text-xs font-normal text-gray-500 ml-1">(${appData.settings.variety})</span></h4>
+                            <p class="text-xs text-gray-500 flex items-center gap-1 mt-0.5"><i class="ph ph-calendar"></i> Mula: ${b.date}</p>
                         </div>
-
-                        <div class="flex items-center gap-2 border-t border-slate-700/50 pt-3">
-                            <button onclick="openHarvestModal('${batch.id}')" class="flex-1 py-2 bg-agri-600/20 hover:bg-agri-600/30 text-agri-400 border border-agri-500/30 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5">
-                                <i class="fa-solid fa-plus"></i> Rekod Hasil / Kematian
-                            </button>
-                            <button onclick="deleteBatch('${batch.id}')" class="p-2 text-slate-500 hover:text-chili-500 transition">
-                                <i class="fa-solid fa-trash-can text-sm"></i>
-                            </button>
+                        <button onclick="deleteBatch(${b.id})" class="text-red-400 hover:text-red-600 p-1"><i class="ph ph-trash text-lg"></i></button>
+                    </div>
+                    
+                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg mb-3">
+                        <div class="text-center w-1/2 border-r border-gray-200">
+                            <p class="text-[10px] text-gray-500 uppercase">Hidup</p>
+                            <p class="font-bold text-gray-800 text-lg">${b.live}<span class="text-xs text-gray-400">/${b.initial}</span></p>
+                        </div>
+                        <div class="text-center w-1/2">
+                            <button onclick="updateMortality(${b.id})" class="text-xs text-blue-600 font-semibold border border-blue-200 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100">Kemas Kini Pokok</button>
                         </div>
                     </div>
+
+                    <!-- Jadual Fasa Automatik -->
+                    <div class="mb-1 flex justify-between items-end">
+                        <span class="text-xs font-bold text-gray-700">${info.phase}</span>
+                        <span class="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-semibold">Hari ${info.days}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                        <div class="bg-gradient-to-r from-red-400 to-red-600 h-2 rounded-full" style="width: ${progressW}%"></div>
+                    </div>
+                    
+                    <!-- Fasa Milestones -->
+                    <div class="flex justify-between text-[9px] text-gray-400 font-medium px-1">
+                        <span>Semaian</span>
+                        <span>Pindah</span>
+                        <span>Bunga</span>
+                        <span>Tuai</span>
+                    </div>
+                </div>
                 `;
-                container.innerHTML += cardHtml;
+                list.innerHTML += card;
             });
         }
 
-        function updateOverallStats() {
-            let totalBatches = appState.batches.length;
-            let totalTrees = 0;
-            let totalHarvest = 0;
-            let totalRevenue = 0;
-
-            appState.batches.forEach(b => {
-                totalTrees += Math.max(0, b.initialTrees - b.deadTrees);
-                totalHarvest += b.totalHarvestKg || 0;
-                totalRevenue += b.totalRevenueRM || 0;
-            });
-
-            document.getElementById('statTotalBatches').innerText = totalBatches;
-            document.getElementById('statLiveTrees').innerText = totalTrees;
-            document.getElementById('statTotalHarvest').innerText = `${totalHarvest.toFixed(1)} kg`;
-            document.getElementById('statTotalRevenue').innerText = `RM ${totalRevenue.toFixed(2)}`;
-        }
-
-        // Batch Modal Handlers
-        function openNewBatchModal() {
-            document.getElementById('newBatchModal').classList.remove('hidden');
-        }
-        function closeNewBatchModal() {
-            document.getElementById('newBatchModal').classList.add('hidden');
-        }
-
-        function handleCreateBatch(e) {
-            e.preventDefault();
-            const name = document.getElementById('batchNameInput').value;
-            const variety = document.getElementById('batchVarietyInput').value;
-            const trees = parseInt(document.getElementById('batchTreesInput').value) || 0;
-            const date = document.getElementById('batchDateInput').value;
-
-            const newBatch = {
-                id: 'batch-' + Date.now(),
-                name: name,
-                variety: variety,
-                initialTrees: trees,
-                deadTrees: 0,
-                startDate: date,
-                totalHarvestKg: 0,
-                totalRevenueRM: 0
-            };
-
-            appState.batches.unshift(newBatch);
-            saveState();
-            closeNewBatchModal();
-            document.getElementById('newBatchForm').reset();
-        }
-
-        function deleteBatch(batchId) {
-            if (confirm("Adakah anda pasti mahu memadamkan batch ini? Data tidak boleh dikembalikan.")) {
-                appState.batches = appState.batches.filter(b => b.id !== batchId);
-                saveState();
-            }
-        }
-
-        // Harvest Modal Handlers
-        function openHarvestModal(batchId) {
-            document.getElementById('activeBatchId').value = batchId;
-            document.getElementById('newDeadTreesInput').value = 0;
-            document.getElementById('harvestWeightInput').value = 0.0;
-            document.getElementById('harvestRevenueInput').value = 0.00;
-            document.getElementById('logHarvestModal').classList.remove('hidden');
-        }
-        function closeHarvestModal() {
-            document.getElementById('logHarvestModal').classList.add('hidden');
-        }
-
-        function handleSaveHarvest(e) {
-            e.preventDefault();
-            const batchId = document.getElementById('activeBatchId').value;
-            const deadAdd = parseInt(document.getElementById('newDeadTreesInput').value) || 0;
-            const weightAdd = parseFloat(document.getElementById('harvestWeightInput').value) || 0;
-            const revenueAdd = parseFloat(document.getElementById('harvestRevenueInput').value) || 0;
-
-            const batch = appState.batches.find(b => b.id === batchId);
-            if (batch) {
-                batch.deadTrees = (batch.deadTrees || 0) + deadAdd;
-                batch.totalHarvestKg = (batch.totalHarvestKg || 0) + weightAdd;
-                batch.totalRevenueRM = (batch.totalRevenueRM || 0) + revenueAdd;
-                saveState();
-            }
-            closeHarvestModal();
-        }
-
-        function calculateFertilizer() {
-            const type = document.getElementById('calcType').value;
-            const phase = document.getElementById('calcPhase').value;
-            const trees = parseInt(document.getElementById('calcTreeCount').value) || 0;
-            const waterPerTree = parseFloat(document.getElementById('calcWaterPerTree').value) || 0;
-
-            const totalWater = trees * waterPerTree;
-            document.getElementById('resTotalWater').innerText = `${totalWater.toFixed(0)} L`;
-
-            if (type === 'fertigasi') {
-                document.getElementById('resPekALabel').innerText = 'Pek Stok A (Ml)';
-                document.getElementById('resPekBLabel').innerText = 'Pek Stok B (Ml)';
-
-                let ratio = 2.0; // ml per liter base
-                if (phase === 'vegetative') ratio = 1.8;
-                if (phase === 'harvesting') ratio = 2.5;
-
-                const stokA = totalWater * ratio;
-                const stokB = totalWater * ratio;
-
-                document.getElementById('resPekA').innerText = `${stokA.toFixed(0)} ml`;
-                document.getElementById('resPekB').innerText = `${stokB.toFixed(0)} ml`;
-                document.getElementById('calcNote').innerText = '* Formula berdasarkan nisbah kepekatan stok EC 1:100 fertigasi standard.';
+        function renderBajaGuide() {
+            const guide = document.getElementById('fertilizer-guide');
+            if (appData.settings.fertilizer === 'AB') {
+                guide.innerHTML = `
+                    <p class="mb-2">Panduan EC (Kekonduksian Elektrik) Baja AB mengikut fasa:</p>
+                    <ul class="list-disc pl-5 space-y-1 bg-purple-50 p-3 rounded border border-purple-100">
+                        <li><strong>Minggu 1-2 (Semaian):</strong> EC 1.0 - 1.2</li>
+                        <li><strong>Minggu 3-4 (Pindah):</strong> EC 1.5 - 1.8</li>
+                        <li><strong>Minggu 5-7 (Berbunga):</strong> EC 2.0 - 2.2</li>
+                        <li><strong>Minggu 8 ke atas (Berbuah):</strong> EC 2.5 - 2.8</li>
+                    </ul>
+                    <p class="mt-2 text-xs text-gray-500">Pastikan pH air sentiasa pada tahap 5.8 - 6.5</p>
+                `;
             } else {
-                document.getElementById('resPekALabel').innerText = 'NPK Granul (Gram)';
-                document.getElementById('resPekBLabel').innerText = 'Kerapan Taburan';
-
-                let gramPerTree = 10;
-                if (phase === 'flowering') gramPerTree = 15;
-                if (phase === 'harvesting') gramPerTree = 20;
-
-                const totalGram = trees * gramPerTree;
-                document.getElementById('resPekA').innerText = `${(totalGram / 1000).toFixed(2)} kg`;
-                document.getElementById('resPekB').innerText = `Setiap 14 Hari`;
-                document.getElementById('calcNote').innerText = '* Anggaran taburan NPK 15:15:15 / 12:12:17 mengikut fasa pokok.';
+                guide.innerHTML = `
+                    <p class="mb-2">Panduan pembajaan NPK (Tabur) mengikut fasa:</p>
+                    <ul class="list-disc pl-5 space-y-1 bg-green-50 p-3 rounded border border-green-100">
+                        <li><strong>Pertumbuhan (Minggu 1-4):</strong> NPK 15:15:15 (Tinggi Nitrogen untuk daun)</li>
+                        <li><strong>Berbunga (Minggu 5-7):</strong> NPK 12:12:17 (Tingkatkan Kalium)</li>
+                        <li><strong>Berbuah (Minggu 8+):</strong> NPK 12:12:17 + TE (Trace Elements) kekerapkan setiap 2 minggu.</li>
+                    </ul>
+                    <p class="mt-2 text-xs text-gray-500">Jarakkan baja 5-10cm dari pangkal pokok untuk elak lecur akar.</p>
+                `;
             }
         }
+
+        function initSalesForm() {
+            document.getElementById('sales-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const date = document.getElementById('sale-date').value;
+                const kg = parseFloat(document.getElementById('sale-kg').value);
+                const price = parseFloat(document.getElementById('sale-price').value);
+                
+                appData.sales.push({
+                    id: Date.now(),
+                    date, kg, price
+                });
+                
+                saveData();
+                this.reset();
+                document.getElementById('sale-date').value = new Date().toISOString().split('T')[0];
+                showMessage("Berjaya", "Rekod jualan telah ditambah.");
+            });
+            document.getElementById('sale-date').value = new Date().toISOString().split('T')[0];
+        }
+
+        function deleteSale(id) {
+            showConfirm("Padam Rekod", "Padam rekod jualan ini?", () => {
+                appData.sales = appData.sales.filter(s => s.id !== id);
+                saveData();
+            });
+        }
+
+        function renderSales() {
+            const list = document.getElementById('sales-list');
+            list.innerHTML = '';
+            
+            let totalRev = 0;
+            
+            // Sort by date desc
+            const sortedSales = [...appData.sales].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            if (sortedSales.length === 0) {
+                list.innerHTML = '<div class="text-center text-sm text-gray-500 py-3">Tiada rekod jualan.</div>';
+            }
+
+            sortedSales.forEach(s => {
+                const total = s.kg * s.price;
+                totalRev += total;
+                
+                const item = `
+                <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                    <div>
+                        <p class="text-sm font-bold text-gray-800">${s.kg} KG @ RM${s.price.toFixed(2)}</p>
+                        <p class="text-xs text-gray-500">${s.date}</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <p class="font-bold text-green-600">RM${total.toFixed(2)}</p>
+                        <button onclick="deleteSale(${s.id})" class="text-gray-400 hover:text-red-500"><i class="ph ph-x-circle text-lg"></i></button>
+                    </div>
+                </div>
+                `;
+                list.innerHTML += item;
+            });
+            
+            document.getElementById('total-revenue').innerText = `RM ${totalRev.toFixed(2)}`;
+        }
+
+        function fetchWeather() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=Asia%2FSingapore`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const temp = data.current_weather.temperature;
+                        const wcode = data.current_weather.weathercode;
+                        
+                        let condition = "Cerah";
+                        if(wcode >= 50 && wcode <= 69) condition = "Hujan Ringan";
+                        if(wcode >= 70 && wcode <= 99) condition = "Hujan Lebat/Ribut";
+                        if(wcode >= 1 && wcode <= 3) condition = "Berawan";
+
+                        document.getElementById('weather-mini').innerHTML = `<i class="ph ph-thermometer text-sm"></i> ${temp}°C`;
+                        document.getElementById('weather-details').innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <div class="text-3xl">${temp}°C</div>
+                                <div>
+                                    <div class="font-bold text-gray-800">${condition}</div>
+                                    <div class="text-xs text-gray-500">Berdasarkan lokasi GPS semasa</div>
+                                </div>
+                            </div>
+                        `;
+                    })
+                    .catch(e => {
+                        document.getElementById('weather-mini').innerText = "Ralat";
+                        document.getElementById('weather-details').innerText = "Gagal memuat turun data cuaca.";
+                    });
+                }, error => {
+                    document.getElementById('weather-mini').innerText = "-";
+                    document.getElementById('weather-details').innerText = "Sila benarkan akses lokasi (GPS) untuk maklumat cuaca.";
+                });
+            }
+        }
+
+        function updateUI() {
+            updateDashboard();
+            renderBatches();
+            renderBajaGuide();
+            renderSales();
+        }
+
+        window.onload = function() {
+            loadData();
+            initSettingsForm();
+            initSalesForm();
+            updateUI();
+            fetchWeather();
+        };
+
     </script>
 </body>
 </html>
